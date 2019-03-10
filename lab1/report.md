@@ -104,7 +104,7 @@ Q2：一个被系统认为是符合规范的硬盘主引导扇区的特征是什
 
 ## 练习2
 
-根据附录提示，将 `tools/gdbinit` 中的后两行删掉，随后使用 `make debug-nox` 开始运行（由于我gdb是gef拓展，tui参数会挂）。
+将 `tools/gdbinit` 中的最后一行continue删掉，随后使用 `make debug-nox` 开始运行（由于我gdb是gef拓展，tui参数会挂）。
 
 首先停在了 `0xfff0` 位置，`cs=0xf000`，`eip=0xfff0`，如下图所示：
 

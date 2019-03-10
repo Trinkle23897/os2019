@@ -2,13 +2,13 @@
 
 Special kernel symbols:
   entry  0x00100000 (phys)
-  etext  0x00103424 (phys)
+  etext  0x001034be (phys)
   edata  0x0010ea16 (phys)
   end    0x0010fd20 (phys)
 Kernel executable memory footprint: 64KB
 ebp:0x00007b38 eip:0x00100a4d args:0x00010094 0x00010094 0x00007b68 0x00100084
     kern/debug/kdebug.c:296: print_stackframe+22
-ebp:0x00007b48 eip:0x00100d22 args:0x00000000 0x00000000 0x00000000 0x00007bb8
+ebp:0x00007b48 eip:0x00100d1e args:0x00000000 0x00000000 0x00000000 0x00007bb8
     kern/debug/kmonitor.c:125: mon_backtrace+10
 ebp:0x00007b68 eip:0x00100084 args:0x00000000 0x00007b90 0xffff0000 0x00007b94
     kern/init/init.c:48: grade_backtrace2+19
@@ -16,7 +16,7 @@ ebp:0x00007b88 eip:0x001000a6 args:0x00000000 0xffff0000 0x00007bb4 0x00000029
     kern/init/init.c:53: grade_backtrace1+27
 ebp:0x00007ba8 eip:0x001000c3 args:0x00000000 0x00100000 0xffff0000 0x00100043
     kern/init/init.c:58: grade_backtrace0+19
-ebp:0x00007bc8 eip:0x001000e4 args:0x00000000 0x00000000 0x00000000 0x00103440
+ebp:0x00007bc8 eip:0x001000e4 args:0x00000000 0x00000000 0x00000000 0x001034c0
     kern/init/init.c:63: grade_backtrace+26
 ebp:0x00007be8 eip:0x00100050 args:0x00000000 0x00000000 0x00000000 0x00007c4f
     kern/init/init.c:28: kern_init+79
@@ -29,34 +29,33 @@ ebp:0x00007bf8 eip:0x00007d6e args:0xc031fcfa 0xc08ed88e 0x64e4d08e 0xfa7502a8
 0:  es = 10
 0:  ss = 10
 +++ switch to  user  mode +++
-1: @ring 0
-1:  cs = 8
-1:  ds = 10
-1:  es = 10
-1:  ss = 10
+1: @ring 3
+1:  cs = 1b
+1:  ds = 23
+1:  es = 23
+1:  ss = 23
 +++ switch to kernel mode +++
-2: @ring 0
-2:  cs = 8
-2:  ds = 10
-2:  es = 10
-2:  ss = 10
 100 ticks
 End of Test.
 kernel panic at kern/trap/trap.c:18:
     EOT: kernel seems ok.
 stack trackback:
-ebp:0x00007b00 eip:0x00100a4d args:0x00000000 0xffffffff 0x00007b2c 0x00007b34
+ebp:0x0010fc48 eip:0x00100a4d args:0x00000000 0x00000000 0x0010fc74 0x0010fc7c
     kern/debug/kdebug.c:296: print_stackframe+22
-ebp:0x00007b20 eip:0x0010041f args:0x001037ee 0x00000012 0x001037d8 0x00007b4c
+ebp:0x0010fc68 eip:0x0010041f args:0x0010386e 0x00000012 0x00103858 0x00000000
     kern/debug/panic.c:27: __panic+107
-ebp:0x00007b40 eip:0x0010180e args:0x00007b68 0x0000000c 0x00007b74 0x00007b6c
-    kern/trap/trap.c:18: print_ticks+59
-ebp:0x00007b60 eip:0x00101cde args:0x00007b8c 0x0010280d 0x00007b74 0x00000000
+ebp:0x0010fc88 eip:0x0010180e args:0x00000000 0x00000000 0x00000000 0x00000000
+    kern/trap/trap.c:0: print_ticks+59
+ebp:0x0010fca8 eip:0x00101cdc args:0x0010fcd4 0x00000000 0x00000000 0x00000000
     kern/trap/trap.c:158: trap_dispatch+125
-ebp:0x00007b80 eip:0x00101d7f args:0x00007b8c 0x00000000 0x00010094 0x00007be8
-    kern/trap/trap.c:194: trap+16
-ebp:0x00007be8 eip:0x0010280d args:0x00000000 0x00000000 0x00000000 0x00007c4f
+ebp:0x0010fcc8 eip:0x00101e19 args:0x0010fcd4 0x00000000 0x00010094 0x00007bb8
+    kern/trap/trap.c:205: trap+16
+ebp:0x00007bb8 eip:0x001028a7 args:0x0010e560 0x00000100 0x00007be8 0x0010006e
     kern/trap/trapentry.S:24: <unknown>+0
+ebp:0x00007bc8 eip:0x001001f8 args:0x00000000 0x00000000 0x00000000 0x001034c0
+    kern/init/init.c:114: lab1_switch_test+57
+ebp:0x00007be8 eip:0x0010006e args:0x00000000 0x00000000 0x00000000 0x00007c4f
+    kern/init/init.c:40: kern_init+109
 ebp:0x00007bf8 eip:0x00007d6e args:0xc031fcfa 0xc08ed88e 0x64e4d08e 0xfa7502a8
     <unknow>: -- 0x00007d6d --
 Welcome to the kernel debug monitor!!

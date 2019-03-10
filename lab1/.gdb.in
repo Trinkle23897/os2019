@@ -1,3 +1,0 @@
-target remote localhost:1234
-break *0x001002f1
-continue

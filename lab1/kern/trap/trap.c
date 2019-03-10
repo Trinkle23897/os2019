@@ -144,7 +144,6 @@ print_regs(struct pushregs *regs) {
 static void
 trap_dispatch(struct trapframe *tf) {
     char c;
-
     switch (tf->tf_trapno) {
     case IRQ_OFFSET + IRQ_TIMER:
         /* LAB1 2016011446 : STEP 3 */
@@ -164,16 +163,30 @@ trap_dispatch(struct trapframe *tf) {
     case IRQ_OFFSET + IRQ_KBD:
         c = cons_getc();
         cprintf("kbd [%03d] %c\n", c, c);
+        if (c == '3') goto __T_SWITCH_TOU;
+        if (c == '0') goto __T_SWITCH_TOK;
         break;
     //LAB1 CHALLENGE 1 : 2016011446 you should modify below codes.
-    case T_SWITCH_TOU:
-        tf->tf_cs = USER_CS;
-        tf->tf_ds = tf->tf_es = tf->tf_fs = tf->tf_gs = tf->tf_ss = USER_DS;
-        tf->tf_eflags |= FL_IOPL_MASK;
-        tf->tf_esp = ((uintptr_t)tf) + sizeof(struct trapframe);
+    case T_SWITCH_TOU: __T_SWITCH_TOU:
+        if (trap_in_kernel(tf)) {
+            struct trapframe user_tf = *tf;
+            user_tf.tf_cs = USER_CS;
+            user_tf.tf_ds = user_tf.tf_es = user_tf.tf_ss = USER_DS;
+            user_tf.tf_eflags |= FL_IOPL_MASK;
+            user_tf.tf_esp = ((uintptr_t)tf) + sizeof(struct trapframe) - 2 * sizeof(uintptr_t);
+            *((uintptr_t*)tf - 1) = (uint32_t)&user_tf;
+        }
         break;
-    case T_SWITCH_TOK:
-        
+    case T_SWITCH_TOK: __T_SWITCH_TOK:
+        if (!trap_in_kernel(tf)) {
+            struct trapframe *new_tf;
+            tf->tf_cs = KERNEL_CS;
+            tf->tf_ds = tf->tf_es = KERNEL_DS;
+            tf->tf_eflags &= ~FL_IOPL_MASK;
+            new_tf = (struct trapframe*)(tf->tf_esp - sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
+            memmove(new_tf, tf, sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
+            *((uintptr_t*)tf - 1) = (uintptr_t)new_tf;
+        }
         break;
     case IRQ_OFFSET + IRQ_IDE1:
     case IRQ_OFFSET + IRQ_IDE2:
