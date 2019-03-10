@@ -141,6 +141,7 @@ print_regs(struct pushregs *regs) {
     cprintf("  ecx  0x%08x\n", regs->reg_ecx);
     cprintf("  eax  0x%08x\n", regs->reg_eax);
 }
+
 void TOU(struct trapframe *tf) {
     if (trap_in_kernel(tf)) {
         struct trapframe user_tf = *tf;
