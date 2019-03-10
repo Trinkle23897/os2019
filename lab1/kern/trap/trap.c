@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <console.h>
 #include <kdebug.h>
+#include <init.h>
 
 #define TICK_NUM 100
 
@@ -51,6 +52,7 @@ idt_init(void) {
     for (i = 0; i < 256; ++i)
         SETGATE(idt[i], 0, KERNEL_CS, __vectors[i], DPL_KERNEL);
     SETGATE(idt[T_SYSCALL], 1, KERNEL_CS, __vectors[T_SYSCALL], DPL_USER);
+    SETGATE(idt[T_SWITCH_TOK], 1, KERNEL_CS, __vectors[T_SWITCH_TOK], DPL_USER);
     lidt(&idt_pd);
 }
 
@@ -139,6 +141,27 @@ print_regs(struct pushregs *regs) {
     cprintf("  ecx  0x%08x\n", regs->reg_ecx);
     cprintf("  eax  0x%08x\n", regs->reg_eax);
 }
+void TOU(struct trapframe *tf) {
+    if (trap_in_kernel(tf)) {
+        struct trapframe user_tf = *tf;
+        user_tf.tf_cs = USER_CS;
+        user_tf.tf_ds = user_tf.tf_es = user_tf.tf_ss = user_tf.tf_gs = user_tf.tf_fs = USER_DS;
+        user_tf.tf_eflags |= FL_IOPL_MASK | FL_IF;
+        user_tf.tf_esp = ((uintptr_t)tf) + sizeof(struct trapframe) - 2 * sizeof(uintptr_t);
+        *((uintptr_t*)tf - 1) = (uint32_t)&user_tf;
+    }
+}
+
+void TOK(struct trapframe *tf) {
+    if (!trap_in_kernel(tf)) {
+        struct trapframe *kern_tf = (struct trapframe*)(tf->tf_esp - sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
+        tf->tf_cs = KERNEL_CS;
+        tf->tf_ds = tf->tf_es = tf->tf_ss = tf->tf_gs = tf->tf_fs = KERNEL_DS;
+        tf->tf_eflags &= ~FL_IOPL_MASK;
+        memmove(kern_tf, tf, sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
+        *((uintptr_t*)tf - 1) = (uintptr_t)kern_tf;
+    }
+}
 
 /* trap_dispatch - dispatch based on what type of trap occurred */
 static void
@@ -163,30 +186,23 @@ trap_dispatch(struct trapframe *tf) {
     case IRQ_OFFSET + IRQ_KBD:
         c = cons_getc();
         cprintf("kbd [%03d] %c\n", c, c);
-        if (c == '3') goto __T_SWITCH_TOU;
-        if (c == '0') goto __T_SWITCH_TOK;
+        if (c == '3') {
+            cprintf("+++ switch to  user  mode +++\n");
+            lab1_switch_to_user();
+            lab1_print_cur_status();
+        }
+        if (c == '0') {
+            cprintf("+++ switch to kernel mode +++\n");
+            lab1_switch_to_kernel();
+            lab1_print_cur_status();
+        }
         break;
     //LAB1 CHALLENGE 1 : 2016011446 you should modify below codes.
-    case T_SWITCH_TOU: __T_SWITCH_TOU:
-        if (trap_in_kernel(tf)) {
-            struct trapframe user_tf = *tf;
-            user_tf.tf_cs = USER_CS;
-            user_tf.tf_ds = user_tf.tf_es = user_tf.tf_ss = USER_DS;
-            user_tf.tf_eflags |= FL_IOPL_MASK;
-            user_tf.tf_esp = ((uintptr_t)tf) + sizeof(struct trapframe) - 2 * sizeof(uintptr_t);
-            *((uintptr_t*)tf - 1) = (uint32_t)&user_tf;
-        }
+    case T_SWITCH_TOU:
+        TOU(tf);
         break;
-    case T_SWITCH_TOK: __T_SWITCH_TOK:
-        if (!trap_in_kernel(tf)) {
-            struct trapframe *new_tf;
-            tf->tf_cs = KERNEL_CS;
-            tf->tf_ds = tf->tf_es = KERNEL_DS;
-            tf->tf_eflags &= ~FL_IOPL_MASK;
-            new_tf = (struct trapframe*)(tf->tf_esp - sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
-            memmove(new_tf, tf, sizeof(struct trapframe) - 2 * sizeof(uintptr_t));
-            *((uintptr_t*)tf - 1) = (uintptr_t)new_tf;
-        }
+    case T_SWITCH_TOK:
+        TOK(tf);
         break;
     case IRQ_OFFSET + IRQ_IDE1:
     case IRQ_OFFSET + IRQ_IDE2:
@@ -211,4 +227,3 @@ trap(struct trapframe *tf) {
     // dispatch based on what type of trap occurred
     trap_dispatch(tf);
 }
-

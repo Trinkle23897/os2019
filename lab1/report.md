@@ -263,11 +263,41 @@ qemu-system-i386: terminating on signal 2
 
 ## 拓展1
 
+以内核态到用户态为例，要改两个地方
 
+1. `kern/init/init.c`：修改 `lab1_switch_to_user`，使用汇编代码触发中断。由于中断在内核态产生，因此处理器没有压入ss和esp，需要预留出这两个寄存器的压栈空间。在 https://chyyuu.gitbooks.io/ucore_os_docs/content/lab1/lab1_2_1_7_ex7.html 的 “注意2” 中已经给出相应的汇编代码。
+2. `kern/trap/trap.c`：设置好trapframe参数
+   1. cs设为用户代码段选择子，其他设置为用户数据段选择子
+   2. esp设置为 `lab1_switch_to_user` 的return address
+   3. 设置eflags的IOPL使得在用户态可以进行IO
+   4. ss设置为一个临时的用户态栈，代码中为 `new_tf`
+
+用户态到内核态同理，不用为ss和esp预留空间，但是需要在中断向量表初始化最后添加对 `T_SWITCH_TOK` 的初始化，如下所示：
+
+```c
+SETGATE(idt[T_SWITCH_TOK], 1, KERNEL_CS, __vectors[T_SWITCH_TOK], DPL_USER);
+```
 
 ## 拓展2
 
+在 `kern/trap/trap.c` 中的 `IRQ_KBD` 处添加如下代码：
 
+```c
+if (c == '3') TOU(tf);
+if (c == '0') TOK(tf);
+```
+
+但我想把拓展1中的输出也放进来，于是添加了个 `init.h`，然后改了下makefile，发现不对，用户态没法输入……
+
+仔细分析了一波，发现eflag最开始是 `0x202` 到 `0x3202`，之后是从 `0x12` 到 `0x3012`，对比一下发现IF被关了，于是把IF开起来就能正常切换了，代码如下：
+
+```c
+user_tf.tf_eflags |= FL_IOPL_MASK | FL_IF;
+```
+
+效果如下所示：
+
+![](pic/kb.png)
 
 ## 总结
 
@@ -280,6 +310,8 @@ qemu-system-i386: terminating on signal 2
 5. 中断处理过程
 6. ELF格式
 7. 磁盘读取
+8. 函数堆栈
+9. 特权转换、中断堆栈切换
 
 #### 本实验中没有对应的
 

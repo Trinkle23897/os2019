@@ -122,6 +122,7 @@ $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
 KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
 			   kern/trap/ \
+			   kern/init/ \
 			   kern/mm/
 
 KSRCDIR		+= kern/init \

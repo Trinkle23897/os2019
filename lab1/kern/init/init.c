@@ -1,14 +1,4 @@
-#include <defs.h>
-#include <stdio.h>
-#include <string.h>
-#include <console.h>
-#include <kdebug.h>
-#include <picirq.h>
-#include <trap.h>
-#include <clock.h>
-#include <intr.h>
-#include <pmm.h>
-#include <kmonitor.h>
+#include <init.h>
 int kern_init(void) __attribute__((noreturn));
 void grade_backtrace(void);
 static void lab1_switch_test(void);
@@ -63,7 +53,7 @@ grade_backtrace(void) {
     grade_backtrace0(0, (int)kern_init, 0xffff0000);
 }
 
-static void
+void
 lab1_print_cur_status(void) {
     static int round = 0;
     uint16_t reg1, reg2, reg3, reg4;
@@ -81,7 +71,7 @@ lab1_print_cur_status(void) {
     round ++;
 }
 
-static void
+void
 lab1_switch_to_user(void) {
     //LAB1 CHALLENGE 1 : TODO
     asm volatile (
@@ -93,7 +83,7 @@ lab1_switch_to_user(void) {
     );
 }
 
-static void
+void
 lab1_switch_to_kernel(void) {
     //LAB1 CHALLENGE 1 :  TODO
     asm volatile (
