@@ -290,7 +290,7 @@ read_eip(void) {
  * */
 void
 print_stackframe(void) {
-     /* LAB1 YOUR CODE : STEP 1 */
+     /* LAB1 2016011446 : STEP 1 */
     uint32_t ebp, eip, i;
     ebp = read_ebp();
     eip = read_eip();
