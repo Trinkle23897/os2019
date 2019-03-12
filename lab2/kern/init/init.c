@@ -16,6 +16,7 @@ static void lab1_switch_test(void);
 
 int
 kern_init(void) {
+    cprintf("try\n");
     extern char edata[], end[];
     memset(edata, 0, end - edata);
 
