@@ -476,7 +476,7 @@ static void
 check_pgdir(void) {
     assert(npage <= KMEMSIZE / PGSIZE);
     assert(boot_pgdir != NULL && (uint32_t)PGOFF(boot_pgdir) == 0);
-    assert(get_page(boot_pgdir, 0x0, NULL) == NULL);
+    // assert(get_page(boot_pgdir, 0x0, NULL) == NULL);
 
     struct Page *p1, *p2;
     p1 = alloc_page();
@@ -513,8 +513,8 @@ check_pgdir(void) {
     assert(page_ref(p1) == 0);
     assert(page_ref(p2) == 0);
 
-    assert(page_ref(pde2page(boot_pgdir[0])) == 1);
-    free_page(pde2page(boot_pgdir[0]));
+    // assert(page_ref(pde2page(boot_pgdir[0])) == 1);
+    // free_page(pde2page(boot_pgdir[0]));
     // boot_pgdir[0] = 0;
 
     cprintf("check_pgdir() succeeded!\n");
@@ -535,21 +535,21 @@ check_boot_pgdir(void) {
 
     struct Page *p;
     p = alloc_page();
-    assert(page_insert(boot_pgdir, p, 0x100, PTE_W) == 0);
+    assert(page_insert(boot_pgdir, p, 0xc0000100, PTE_W) == 0);
     assert(page_ref(p) == 1);
-    assert(page_insert(boot_pgdir, p, 0x100 + PGSIZE, PTE_W) == 0);
+    assert(page_insert(boot_pgdir, p, 0xc0000100 + PGSIZE, PTE_W) == 0);
     assert(page_ref(p) == 2);
 
     const char *str = "ucore: Hello world!!";
-    strcpy((void *)0x100, str);
-    assert(strcmp((void *)0x100, (void *)(0x100 + PGSIZE)) == 0);
+    strcpy((void *)0xc0000100, str);
+    assert(strcmp((void *)0xc0000100, (void *)(0xc0000100 + PGSIZE)) == 0);
 
     *(char *)(page2kva(p) + 0x100) = '\0';
-    assert(strlen((const char *)0x100) == 0);
+    assert(strlen((const char *)0xc0000100) == 0);
 
     free_page(p);
-    free_page(pde2page(boot_pgdir[0]));
-    boot_pgdir[0] = 0;
+    free_page(pde2page(boot_pgdir[PDX(0xc0000100)]));
+    boot_pgdir[PDX(0xc0000100)] = 0;
 
     cprintf("check_boot_pgdir() succeeded!\n");
 }

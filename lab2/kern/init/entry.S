@@ -24,8 +24,8 @@ kern_entry:
 next:
 
     # unmap va 0 ~ 4M, it's temporary mapping
-    xorl %eax, %eax
-    movl %eax, __boot_pgdir
+    # xorl %eax, %eax
+    # movl %eax, __boot_pgdir
 
     # set ebp, esp
     movl $0x0, %ebp
@@ -55,8 +55,8 @@ bootstacktop:
 __boot_pgdir:
 .globl __boot_pgdir
     # map va 0 ~ 4M to pa 0 ~ 4M (temporary)
-    .long REALLOC(__boot_pt1) + (PTE_P | PTE_U | PTE_W)
-    .space (KERNBASE >> PGSHIFT >> 10 << 2) - (. - __boot_pgdir) # pad to PDE of KERNBASE
+    # .long REALLOC(__boot_pt1) + (PTE_P | PTE_U | PTE_W)
+    # .space (KERNBASE >> PGSHIFT >> 10 << 2) - (. - __boot_pgdir) # pad to PDE of KERNBASE
     # map va KERNBASE + (0 ~ 4M) to pa 0 ~ 4M
     .long REALLOC(__boot_pt1) + (PTE_P | PTE_U | PTE_W)
     .space PGSIZE - (. - __boot_pgdir) # pad to PGSIZE
