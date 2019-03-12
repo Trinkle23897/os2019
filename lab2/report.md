@@ -33,7 +33,7 @@
 
 PDE和PTE在代码中看起来后面几位的含义一致，不再复述。
 
-如果ucore执行过程中访问内存，出现了页访问异常，根据 https://chyyuu.gitbooks.io/ucore_os_docs/content/lab3/lab3_4_page_fault_handler.html，CPU把引起页访问异常的线性地址装到寄存器CR2中，并给出了出错码errorCode，说明了页访问异常的类型。并且CPU在当前内核栈保存当前被打断的程序现场，即依次压入当前被打断程序使用的EFLAGS，CS，EIP，errorCode。随后查询IDT找到中断服务程序入口点，把例程的地址加载到CS和EIP寄存器中，开始执行中断服务例程。
+如果ucore执行过程中访问内存，出现了页访问异常，根据 https://chyyuu.gitbooks.io/ucore_os_docs/content/lab3/lab3_4_page_fault_handler.html ，CPU把引起页访问异常的线性地址装到寄存器CR2中，并给出了出错码errorCode，说明了页访问异常的类型。并且CPU在当前内核栈保存当前被打断的程序现场，即依次压入当前被打断程序使用的EFLAGS，CS，EIP，errorCode。随后查询IDT找到中断服务程序入口点，把例程的地址加载到CS和EIP寄存器中，开始执行中断服务例程。
 
 ## 练习3
 
@@ -42,6 +42,17 @@ PDE和PTE在代码中看起来后面几位的含义一致，不再复述。
 Page每一项与页表中的页目录项和页表项有对应关系。它们高20位均为物理页号，根据宏 `pa2page` 与 `page2pa`，可以根据高20位建立起它们的映射关系，都是基址+偏移量，只不过基址不同。
 
 如果希望虚拟地址与物理地址相等，则需要修改以下内容：
+
+1. 修改 `kern/mm/memlayout.h` 中的 `KERNBASE` 为 `0x00000000`（line 56）
+2. 修改 `tools/kernel.ld` 中的基址为 `0x00100000` （line 10）
+3. 修改 `kern/init/entry.S` 中：注释掉27-28行，避免删掉谭院士最开始手动建立的页表；注释掉58-59行，取消第一个临时映射，反正kernbase改成0之后这两句话就是错的，padding根本不对
+4. 相应修改 `kern/mm/pmm.c` 中的测试
+
+具体可查看 [https://github.com/oscourse-tsinghua/os2019-Trinkle23897/compare/lab2-zero](https://github.com/oscourse-tsinghua/os2019-Trinkle23897/compare/lab2-zero)
+
+效果如下所示，可以看见PDE的第一项是恒等映射：
+
+![](pic/equ.png)
 
 ## 总结
 

@@ -110,7 +110,7 @@ Q2：一个被系统认为是符合规范的硬盘主引导扇区的特征是什
 
 ![](pic/make_debug.png)
 
-然而真正的指令并不是位于 `0xfff0` 的这个，根据 https://chyyuu.gitbooks.io/ucore_os_docs/lab1/lab1_3_1_bios_booting.html，指令其实位于 `0xfffffff0` 处。直接查看：输入 `x/i 0xfffffff0` 会得到 `jmp 0x3630:0xf000e05b`，看起来是gdb默认32位，可是我输入命令 `set arch i8086` 之后再次执行，还是同一输出。`si` 之后下一步确实跳到了 `0xe05b`。
+然而真正的指令并不是位于 `0xfff0` 的这个，根据 https://chyyuu.gitbooks.io/ucore_os_docs/lab1/lab1_3_1_bios_booting.html ，指令其实位于 `0xfffffff0` 处。直接查看：输入 `x/i 0xfffffff0` 会得到 `jmp 0x3630:0xf000e05b`，看起来是gdb默认32位，可是我输入命令 `set arch i8086` 之后再次执行，还是同一输出。`si` 之后下一步确实跳到了 `0xe05b`。
 
 使用命令 `b *0x7c00` 设置断点，结果如下：
 
@@ -124,7 +124,7 @@ Q2：一个被系统认为是符合规范的硬盘主引导扇区的特征是什
 
 根据 `boot/bootasm.S` 中的代码，具体分为如下几个步骤：
 
-1. 开启A20地址线：（line 29-43）根据 https://chyyuu.gitbooks.io/ucore_os_docs/content/lab1/lab1_appendix_a20.html，分为如下小步骤：
+1. 开启A20地址线：（line 29-43）根据 https://chyyuu.gitbooks.io/ucore_os_docs/content/lab1/lab1_appendix_a20.html ，分为如下小步骤：
    1. 等待直到8042不忙，之后写入0xd1到0x64端口，意为写P2
    2. 等待直到8042不忙，之后写入0xdf到0x60端口，意为置P2的A20位为1
 2. 配置GDT并开启保护模式：（line 49-52，77-87）
