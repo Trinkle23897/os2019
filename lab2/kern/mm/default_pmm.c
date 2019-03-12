@@ -180,11 +180,7 @@ default_free_pages(struct Page *base, size_t n) {
             list_del(&(p->page_link));
         }
     }
-    for (le = list_next(&free_list); le != &free_list; le = list_next(le)) {
-        p = le2page(le, page_link);
-        if (base + base->property < p)
-            break;
-    }
+    for (le = list_next(&free_list); le != &free_list && base + base->property >= le2page(le, page_link); le = list_next(le));
     nr_free += n;
     list_add_before(le, &(base->page_link));
 }
