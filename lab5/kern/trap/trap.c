@@ -58,7 +58,7 @@ idt_init(void) {
     for (i = 0; i < 256; ++i)
         SETGATE(idt[i], 0, KERNEL_CS, __vectors[i], DPL_KERNEL);
     SETGATE(idt[T_SYSCALL], 1, KERNEL_CS, __vectors[T_SYSCALL], DPL_USER);
-    SETGATE(idt[T_SWITCH_TOK], 1, KERNEL_CS, __vectors[T_SWITCH_TOK], DPL_USER);
+    SETGATE(idt[T_SWITCH_TOK], 0, KERNEL_CS, __vectors[T_SWITCH_TOK], DPL_USER);
     lidt(&idt_pd);
      /* LAB5 2016011446 */ 
      //you should update your lab1 code (just add ONE or TWO lines of code), let user app to use syscall to get the service of ucore
@@ -227,8 +227,10 @@ trap_dispatch(struct trapframe *tf) {
          * (3) Too Simple? Yes, I think so!
          */
         ++ticks;
-        if (ticks % TICK_NUM == 0)
-            print_ticks();
+        if (ticks % TICK_NUM == 0) {
+            // print_ticks();
+            current->need_resched = 1;
+        }
         break;
         /* LAB5 2016011446 */
         /* you should upate you lab1 code (just add ONE or TWO lines of code):

@@ -500,6 +500,10 @@ copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool share) {
         assert(page!=NULL);
         assert(npage!=NULL);
         int ret=0;
+        void* src_kvaddr = page2kva(page);
+        void* dst_kvaddr = page2kva(npage);
+        memcpy(dst_kvaddr, src_kvaddr, PGSIZE);
+        ret = page_insert(to, npage, start, perm);
         /* LAB5:EXERCISE2 2016011446
          * replicate content of page to npage, build the map of phy addr of nage with the linear addr start
          *
