@@ -52,9 +52,9 @@ ebp:0x00007b20 eip:0x0010041f args:0x001039ce 0x00000013 0x001039b8 0x00007b4c
 ebp:0x00007b40 eip:0x0010180e args:0x00007b78 0x0000000c 0x00100200 0x00007b6c
     kern/trap/trap.c:0: print_ticks+59
 ebp:0x00007b60 eip:0x00101e78 args:0x00007b8c 0x00007bb8 0x0010fcf4 0x00010094
-    kern/trap/trap.c:180: trap_dispatch+125
+    kern/trap/trap.c:181: trap_dispatch+125
 ebp:0x00007b80 eip:0x00101f79 args:0x00007b8c 0x00000000 0x00010094 0x00007be8
-    kern/trap/trap.c:228: trap+16
+    kern/trap/trap.c:229: trap+16
 ebp:0x00007be8 eip:0x00102a07 args:0x00000000 0x00000000 0x00000000 0x00007c4f
     kern/trap/trapentry.S:24: <unknown>+0
 ebp:0x00007bf8 eip:0x00007d6e args:0xc031fcfa 0xc08ed88e 0x64e4d08e 0xfa7502a8
