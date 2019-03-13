@@ -123,6 +123,11 @@ alloc_proc(void) {
         memset(proc->name, 0, PROC_NAME_LEN + 1);
         proc->wait_state = 0;
         proc->cptr = proc->yptr = proc->optr = NULL;
+        proc->rq = NULL;
+        list_init(&(proc->run_link));
+        proc->time_slice = 0;
+        proc->lab6_run_pool.parent = proc->lab6_run_pool.left = proc->lab6_run_pool.right = NULL;
+        proc->lab6_stride = proc->lab6_priority = 0;
      //LAB6 2016011446 : (update LAB5 steps)
     /*
      * below fields(add in LAB6) in proc_struct need to be initialized
