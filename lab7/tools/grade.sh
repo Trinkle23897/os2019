@@ -557,7 +557,7 @@ run_test -prog 'forktree'    -check default_check               \
         'init check memory pass.'
 
 pts=20
-timeout=150
+timeout=200
 run_test -prog 'priority'      -check default_check             \
 	'sched class: stride_scheduler'                         \
       - 'kernel_execve: pid = ., name = "priority".*'            \
