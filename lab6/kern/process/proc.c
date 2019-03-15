@@ -423,7 +423,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     //    2. call setup_kstack to allocate a kernel stack for child process
     if (setup_kstack(proc) != 0) goto bad_fork_cleanup_proc;
     //    3. call copy_mm to dup OR share mm according clone_flag
-    if (copy_mm(0, proc) != 0) goto bad_fork_cleanup_proc;
+    if (copy_mm(0, proc) != 0) goto bad_fork_cleanup_kstack;
     //    4. call copy_thread to setup tf & context in proc_struct
     copy_thread(proc, stack, tf);
     //    5. insert proc_struct into hash_list && proc_list
