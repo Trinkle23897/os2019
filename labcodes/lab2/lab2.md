@@ -54,6 +54,73 @@ Page每一项与页表中的页目录项和页表项有对应关系。它们高2
 
 ![](pic/equ.png)
 
+## 拓展：Buddy System
+
+如需使用 buddy system 的代码，只需要将 `kern/mm/pmm.c` 中的 `pmm_manager = &default_pmm_manager;` 修改为 `pmm_manager = &buddy_pmm_manager;` 即可。相关代码位于 `kern/mm/buddy_pmm.[ch]` 中。
+
+运行之后可以看到如下输出：
+
+![](pic/buddy.png)
+
+其中 buddy init 显示了内存分配情况，可分配的物理页面数一共有 32291 个，由于 buddy system 所能利用的内存大小必须为2的整数次幂，因此实际能分配的页面数为 16384 个，此外为了管理分配的页面，还需额外的 33 个页面分配给 buddy system 供其使用。至于 33 怎么得出来的：一个页面大小为 4096B，一个uint32占 4B，假设最大页面数为M，buddy能分配的页面数为x，那么需要满足
+$$
+x + x \times 4\mathrm{B} \times 2 / 4096\mathrm{B} \le M
+$$
+乘2的原因：因为完全二叉树嘛，如果有x个叶子，就有x-1个非叶子节点，总共就两倍了。
+
+### 实现
+
+按照zkw线段树的写法直接写就行，核心代码不到60行……
+
+每个节点维护当前段内最长可供分配的连续内存块大小（存放于 `buddy_page` 中）。节点更新信息如下：
+
+1. 如果左孩子和右孩子都没被使用，则当前节点设置成当前块大小；
+2. 如果左孩子或右孩子至少一个被使用过，则当前节点设置成两个孩子可分配最长块大小的最大值。
+
+内存布局：前33个给buddy，中间16384给系统，后面不用。
+
+### 测试
+
+测试代码参考了 https://en.wikipedia.org/wiki/Buddy_memory_allocation 的示意表格，并添加可分配页面和页属性标记的检查。如下：
+
+```c
+static void buddy_check(void) {
+    int all_pages = nr_free_pages();
+    struct Page* p0, *p1, *p2, *p3;
+    assert(alloc_pages(all_pages + 1) == NULL);
+
+    p0 = alloc_pages(1);
+    assert(p0 != NULL);
+    p1 = alloc_pages(2);
+    assert(p1 == p0 + 2);
+    assert(!PageReserved(p0) && !PageProperty(p0));
+    assert(!PageReserved(p1) && !PageProperty(p1));
+
+    p2 = alloc_pages(1);
+    assert(p2 == p0 + 1);
+    p3 = alloc_pages(2);
+    assert(p3 == p0 + 4);
+    assert(!PageProperty(p3) && !PageProperty(p3 + 1) && PageProperty(p3 + 2));
+
+    free_pages(p1, 2);
+    assert(PageProperty(p1) && PageProperty(p1 + 1));
+    assert(p1->ref == 0);
+
+    free_pages(p0, 1);
+    free_pages(p2, 1);
+
+    p2 = alloc_pages(2);
+    assert(p2 == p0);
+    free_pages(p2, 2);
+    assert((*(p2 + 1)).ref == 0);
+    assert(nr_free_pages() == all_pages >> 1);
+
+    free_pages(p3, 2);
+    p1 = alloc_pages(129);
+    free_pages(p1, 256);
+}
+```
+
 ## 总结
 
 #### 本实验中重要的知识点，以及与对应的OS原理中的知识点
