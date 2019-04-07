@@ -32,7 +32,7 @@ trapframe保存了中断发生时进程在被打断之前的状态，用于到�
 
 ## 练习3
 
-对 `proc_fun` 函数分析如下：
+对 `proc_run` 函数分析如下：
 
 ```c
 void proc_run(struct proc_struct *proc) {
